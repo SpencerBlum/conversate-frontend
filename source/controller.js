@@ -34,22 +34,23 @@ class Controller{
         createAccountBtn.addEventListener("click",()=>this.renderCreateAccountPage())
 
 
-        let foundDiv = document.querySelector("#loginPage")
-        
-        foundDiv.appendChild(signInForm)
+        // let foundDiv = document.querySelector("#mainDiv")
+        let mainDiv = this.foundDiv()
+
+        mainDiv.appendChild(signInForm)
         signInForm.appendChild(emailLbl)
         signInForm.appendChild(userEmail)
         signInForm.appendChild(passwordLbl)
         signInForm.appendChild(userPassword)
         signInForm.appendChild(userSubmit)
 
-        foundDiv.appendChild(createAccountBtn)     
+        mainDiv.appendChild(createAccountBtn)     
 
     }
 
     clearPage(){
         console.log("clear the page")
-        document.querySelector("#loginPage").innerHTML= ''
+        document.querySelector("#mainDiv").innerHTML= ''
 
     }
 
@@ -106,7 +107,7 @@ class Controller{
         userSubmit.type = "submit"
         userSubmit.value = "Submit"
 
-        let foundDiv = document.querySelector("#loginPage")
+        let foundDiv = this.foundDiv()
         
         signUpForm.appendChild(emailLbl)
         signUpForm.appendChild(userEmail)
@@ -127,8 +128,10 @@ class Controller{
         //add a submit click listner
         signUpForm.addEventListener("submit", (e)=> {
             e.preventDefault()
-            this.adapter.fetchCreateUser(this.processCreate(e))
-
+            let promise = this.adapter.fetchCreateUser(this.processCreate(e))
+            promise.then((user) => {
+                this.loadHomepage(user)
+            })
         })
         //this click listner will call an adapter method to create a new acount
     }
@@ -144,10 +147,22 @@ class Controller{
             phone_number: e.target.phone_number.value
         }
         return data
-    
-        
     }
 
+    foundDiv(){
+        let foundDiv = document.querySelector("#mainDiv")
+        return foundDiv
+    }
+
+    loadHomepage(data){
+        this.clearPage()
+        console.log(data)
+
+        // console.log(this.foundDiv())
+        let contactsDiv = document.createElement("div")
+    }
+
+    
 }
 
 
