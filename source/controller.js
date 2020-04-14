@@ -29,6 +29,12 @@ class Controller{
         userSubmit.type = "submit"
         userSubmit.value = "Submit"
 
+        signInForm.addEventListener("submit", (e) => {
+            e.preventDefault()
+            this.loginUser(e)
+
+        })
+
         createAccountBtn.innerText = "Create Account"
         createAccountBtn.id = "create-account"
         createAccountBtn.addEventListener("click",()=>this.renderCreateAccountPage())
@@ -45,6 +51,26 @@ class Controller{
         signInForm.appendChild(userSubmit)
 
         mainDiv.appendChild(createAccountBtn)     
+
+    }
+
+    loginUser(e){
+
+    let data = { 
+            email: e.target.email.value,
+            password: e.target.password.value
+    }
+
+    this.adapter.fetchLoginUser(data)
+    .then(user => {
+        if (user.message === 'Loggin Failed'){
+            window.alert(user.message)
+        } else {
+            this.userId = user.id
+            this.loadHomepage(user)
+        }
+        console.log(user)
+    })
 
     }
 
@@ -150,19 +176,136 @@ class Controller{
     }
 
     foundDiv(){
-        let foundDiv = document.querySelector("#mainDiv")
+        const foundDiv = document.querySelector("#mainDiv")
         return foundDiv
     }
 
-    loadHomepage(data){
+    loadHomepage(allUserData){
+        console.log("LOAD USER PAGE")
         this.clearPage()
-        console.log(data)
+        console.log(allUserData)
 
-        // console.log(this.foundDiv())
-        let contactsDiv = document.createElement("div")
+        this.renderProfileInfo(allUserData)
+        this.renderNavButtons()
+        this.renderContacts(allUserData.contacts)
+        this.renderConvo()        
+    } 
+
+    renderProfileInfo(userData){
+        let profileDiv = document.createElement("div")
+        this.foundDiv().appendChild(profileDiv)
+
+        let infoTag = document.createElement("h3")
+        infoTag.innerText = "Profile"
+
+        let userInfo = document.createElement("div")
+
+        let infoName = document.createElement("h4")
+        infoName.innerText = `${userData.first_name} ${userData.last_name}`
+        
+        let infoUsername = document.createElement("h6")
+        infoUsername.innerText = `@${userData.username}`
+
+        let infoEmail = document.createElement("p")
+        infoEmail.innerText = `email:${userData.email}`
+
+        let infoPhone  = document.createElement("p")
+        infoPhone.innerText = `phone:${userData.phone_number}`
+
+        userInfo.appendChild(infoTag)
+        userInfo.appendChild(infoName)
+        userInfo.appendChild(infoUsername)
+        userInfo.appendChild(infoEmail)
+        userInfo.appendChild(infoPhone)
+        profileDiv.appendChild(userInfo)
+
+    }
+    
+    renderNavButtons(){   
+        let buttonContainer = document.createElement("div")
+        this.foundDiv().appendChild(buttonContainer)
+
+        let newContactBtn = document.createElement("button")
+        newContactBtn.innerText = "Add Contact"
+        buttonContainer.appendChild(newContactBtn)
+
+        newContactBtn.addEventListener("click", (e)=> {
+            this.addContactList()
+        })
+
     }
 
+    renderContacts(listOfContacts){
+        let contactDiv = document.createElement("div")
+        this.foundDiv().appendChild(contactDiv)
+
+        let contactList = document.createElement("ul")
+
+        let contactsTag = document.createElement("h3")
+        contactsTag.innerText = "Contacts"
+        contactDiv.appendChild(contactsTag)
+
+        for (let user of listOfContacts) {
+            let newLi = document.createElement("li")
+            newLi.innerText = `${user.first_name} ${user.last_name}`
+            newLi.className = "contactListItem"
+
+            newLi.addEventListener("click", (e)=> {
+                console.log(e.target)
+            }) 
+
+            contactList.appendChild(newLi)
+        }   
+        contactDiv.appendChild(contactList)
+
+    }
+
+    renderConvo(){
+        console.log("render convos")
+    }
     
+    addContactList(){
+        this.clearPage()
+        this.adapter.fetchAllUsers()
+        .then(data => {
+            this.renderAllUsers(data)
+        })
+    }
+
+    addContact(id, contact){
+        console.log(id, contact)
+
+        this.adapter.fetchCreateContact(id, contact.id)
+        .then(data => {
+            console.log(data)
+            this.loadHomepage(data)
+
+        })
+
+    }
+
+    renderAllUsers(contacts){
+
+        //add back button here
+        console.log(contacts)
+        let contactListDiv = document.createElement("div")
+        this.foundDiv().appendChild(contactListDiv)
+
+        let userUl = document.createElement("ul")
+
+        contacts.forEach(( currContact) =>{
+            let newLi = document.createElement("li")
+            //newLi.id = currContact.id
+            newLi.innerText = `${currContact.first_name} ${currContact.last_name}`
+            userUl.appendChild(newLi)
+            let myCallback = () => { this.addContact(this.userId, currContact) }
+            newLi.addEventListener("click", myCallback)
+
+        })
+        contactListDiv.appendChild(userUl)
+
+    }
+
 }
 
 
