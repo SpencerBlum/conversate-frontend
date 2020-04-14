@@ -5,6 +5,13 @@ class Adapter {
         .then(resp => resp.json())
     }
 
+    fetchDeleteContact(id, contactId){
+        return fetch(`http://localhost:3000/users/${id}/newcontact/${contactId}`, {
+             method: 'DELETE', // or 'PUT'
+         })
+         .then((response) => response.json())   
+     }
+
     fetchCreateContact(id, contactId){
         return fetch(`http://localhost:3000/users/${id}/newcontact`, {
              method: 'POST', // or 'PUT'

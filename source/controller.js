@@ -1,3 +1,16 @@
+//no css
+
+//create delete functionality 
+//create back end route to accept an id and only return all contacts that is not him or already on his list
+//get all convopreviews to display use organization fucntions
+//when clicked on a convo show all the messages with name and message of who sent it li
+//add message to convo
+//add a new convo
+
+
+
+
+
 
 class Controller{
 
@@ -244,9 +257,12 @@ class Controller{
         let contactsTag = document.createElement("h3")
         contactsTag.innerText = "Contacts"
         contactDiv.appendChild(contactsTag)
-
+         console.log("happy")
         for (let user of listOfContacts) {
             let newLi = document.createElement("li")
+            let deleteBtn = document.createElement("button")
+            deleteBtn.textContent = "X"
+            newLi.appendChild(deleteBtn)
             newLi.innerText = `${user.first_name} ${user.last_name}`
             newLi.className = "contactListItem"
 
@@ -255,6 +271,12 @@ class Controller{
             }) 
 
             contactList.appendChild(newLi)
+            newLi.appendChild(deleteBtn)
+
+            
+            let myCallback = () => { this.deleteContact(this.userId, user) }
+            newLi.addEventListener("click", myCallback)
+
         }   
         contactDiv.appendChild(contactList)
 
@@ -270,6 +292,18 @@ class Controller{
         .then(data => {
             this.renderAllUsers(data)
         })
+    }
+
+
+    deleteContact(id, contact){
+        console.log(id, contact)
+
+        this.adapter.fetchDeleteContact(id, contact.id)
+        .then(data => {
+            console.log(data)
+            this.loadHomepage(data)
+        })
+
     }
 
     addContact(id, contact){
