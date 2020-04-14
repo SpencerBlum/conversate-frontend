@@ -46,6 +46,13 @@ class Adapter {
          .then((response) => response.json())   
      }
 
+     fetchAllConversations(id){
+        return fetch(`http://localhost:3000/conversations/${id}`)
+         .then(resp => resp.json())
+     }
+
+    
+
 
 
 

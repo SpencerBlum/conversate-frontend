@@ -1,8 +1,8 @@
 //no css
 
-//create delete functionality 
+//create delete functionality *
 //create back end route to accept an id and only return all contacts that is not him or already on his list
-//get all convopreviews to display use organization fucntions
+//get all convopreviews to display use organization functions
 //when clicked on a convo show all the messages with name and message of who sent it li
 //add message to convo
 //add a new convo
@@ -82,7 +82,6 @@ class Controller{
             this.userId = user.id
             this.loadHomepage(user)
         }
-        console.log(user)
     })
 
     }
@@ -194,14 +193,13 @@ class Controller{
     }
 
     loadHomepage(allUserData){
-        console.log("LOAD USER PAGE")
         this.clearPage()
         console.log(allUserData)
 
         this.renderProfileInfo(allUserData)
         this.renderNavButtons()
         this.renderContacts(allUserData.contacts)
-        this.renderConvo()        
+        this.renderConvo(allUserData)        
     } 
 
     renderProfileInfo(userData){
@@ -253,11 +251,12 @@ class Controller{
         this.foundDiv().appendChild(contactDiv)
 
         let contactList = document.createElement("ul")
+        contactList.style.listStyle = "none"
 
         let contactsTag = document.createElement("h3")
         contactsTag.innerText = "Contacts"
         contactDiv.appendChild(contactsTag)
-         console.log("happy")
+        console.log("happy")
         for (let user of listOfContacts) {
             let newLi = document.createElement("li")
             let deleteBtn = document.createElement("button")
@@ -275,15 +274,91 @@ class Controller{
 
             
             let myCallback = () => { this.deleteContact(this.userId, user) }
-            newLi.addEventListener("click", myCallback)
-
+            deleteBtn.addEventListener("click", myCallback)
         }   
         contactDiv.appendChild(contactList)
 
     }
 
-    renderConvo(){
-        console.log("render convos")
+    renderConvo(data){
+        let convoDiv = document.createElement("div")
+        this.foundDiv().appendChild(convoDiv)
+
+        let conversationsLbl = document.createElement("h4")
+        conversationsLbl.innerText = "Conversations"
+        convoDiv.appendChild(conversationsLbl)
+
+        let newUl = document.createElement("ul")
+        convoDiv.appendChild(newUl)
+        newUl.style.listStyle = "none"
+        data.conversations.forEach(convo => {
+            console.log(convo)
+            let newLi = document.createElement("li")
+            newLi.innerText = `${convo.first_name} ${convo.last_name}`
+            newUl.appendChild(newLi)
+            let myCallback = () => { this.loadSpecifcChat(convo.conversation_id) }
+            newLi.addEventListener("click", myCallback)
+        })
+    }
+
+    loadSpecifcChat(convo_id){
+        this.adapter.fetchAllConversations(convo_id)
+        .then(data => {
+
+          console.log(data)  
+          this.renderChatPage(data)
+
+        })
+        //fetch for chat data 
+        //pass chat data into renderchat page
+    }
+
+    renderChatPage(data){
+
+        let topDiv = document.createElement("div")
+        let nameLabel = document.createElement("h5")
+        nameLabel.innerText = "Chat with user name"
+        topDiv.appendChild(nameLabel)
+        this.foundDiv().appendChild(topDiv)
+
+        let chatDiv = document.createElement("div")
+        
+        let chatUl = document.createElement("ul")
+        //do list stuff
+        data.messages.forEach(chat => {
+            let messageLi = document.createElement("li")
+            messageLi.innerText = `${chat.name.first_name} ${chat.name.last_name} - ${chat.message}`
+            chatUl.appendChild(messageLi)
+        })
+        chatDiv.appendChild(chatUl)
+        this.foundDiv().appendChild(chatDiv)
+        data.for
+
+        let formDiv = document.createElement("div")
+        let form = document.createElement("form")
+        let chatInput = document.createElement("input")
+        let userSubmit = document.createElement("input")
+
+        chatInput.name = "message"
+        chatInput.placeholder = "Type here..."
+
+        userSubmit.type = "submit"
+        userSubmit.value = "send"
+
+        this.foundDiv().appendChild(formDiv)
+        formDiv.appendChild(form)
+        form.append(chatInput, userSubmit)
+
+        form.addEventListener("submit", (e) => {
+         this.renderMessage(e)
+
+
+        })
+
+    }
+
+    renderMessage(e){
+        
     }
     
     addContactList(){
@@ -296,36 +371,30 @@ class Controller{
 
 
     deleteContact(id, contact){
-        console.log(id, contact)
 
         this.adapter.fetchDeleteContact(id, contact.id)
         .then(data => {
-            console.log(data)
             this.loadHomepage(data)
         })
 
     }
 
-    addContact(id, contact){
-        console.log(id, contact)
-
+    addContact(id, contact){ 
         this.adapter.fetchCreateContact(id, contact.id)
         .then(data => {
-            console.log(data)
             this.loadHomepage(data)
-
         })
-
     }
 
     renderAllUsers(contacts){
 
         //add back button here
-        console.log(contacts)
+        // console.log(contacts)
         let contactListDiv = document.createElement("div")
         this.foundDiv().appendChild(contactListDiv)
 
         let userUl = document.createElement("ul")
+        userUl.style.listStyle = "none"
 
         contacts.forEach(( currContact) =>{
             let newLi = document.createElement("li")
@@ -334,12 +403,9 @@ class Controller{
             userUl.appendChild(newLi)
             let myCallback = () => { this.addContact(this.userId, currContact) }
             newLi.addEventListener("click", myCallback)
-
         })
         contactListDiv.appendChild(userUl)
-
     }
-
 }
 
 
