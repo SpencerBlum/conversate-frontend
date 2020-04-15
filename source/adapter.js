@@ -51,11 +51,14 @@ class Adapter {
          .then(resp => resp.json())
      }
 
-    
-
-
-
-
-
-
+    fetchNewMessage(data){
+        return fetch("http://localhost:3000/conversations/newmessage", {
+            method: 'POST', // or 'PUT'
+            headers: {
+        'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            })
+            .then((response) => response.json())   
+    }
 }

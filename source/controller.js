@@ -202,6 +202,7 @@ class Controller{
         this.renderConvo(allUserData)        
     } 
 
+
     renderProfileInfo(userData){
         let profileDiv = document.createElement("div")
         this.foundDiv().appendChild(profileDiv)
@@ -305,8 +306,8 @@ class Controller{
         this.adapter.fetchAllConversations(convo_id)
         .then(data => {
 
-          console.log(data)  
-          this.renderChatPage(data)
+        console.log(data)  
+        this.renderChatPage(data)
 
         })
         //fetch for chat data 
@@ -314,7 +315,7 @@ class Controller{
     }
 
     renderChatPage(data){
-
+        this.clearPage()
         let topDiv = document.createElement("div")
         let nameLabel = document.createElement("h5")
         nameLabel.innerText = "Chat with user name"
@@ -324,6 +325,7 @@ class Controller{
         let chatDiv = document.createElement("div")
         
         let chatUl = document.createElement("ul")
+        chatUl.id = "chat-ul"
         //do list stuff
         data.messages.forEach(chat => {
             let messageLi = document.createElement("li")
@@ -332,7 +334,7 @@ class Controller{
         })
         chatDiv.appendChild(chatUl)
         this.foundDiv().appendChild(chatDiv)
-        data.for
+        
 
         let formDiv = document.createElement("div")
         let form = document.createElement("form")
@@ -349,17 +351,45 @@ class Controller{
         formDiv.appendChild(form)
         form.append(chatInput, userSubmit)
 
-        form.addEventListener("submit", (e) => {
-         this.renderMessage(e)
-
-
-        })
-
-    }
-
-    renderMessage(e){
+        let myCallback = (mess) => {this.renderMessage(mess, data) }
+      
         
+        form.addEventListener("submit", (e) => {
+            e.preventDefault()
+          
+            myCallback(e.target.message.value)
+        })
+        
+
     }
+
+    renderMessage(mess, convoData ){
+        console.log(mess)
+        console.log(convoData)
+
+
+        let data = {
+            user_id: this.userId, 
+            conversation_id: convoData.id,
+            message: mess
+        }
+
+         this.adapter.fetchNewMessage(data)
+         .then(resp => {
+            this.renderChatPage(resp)
+            
+            
+         })
+
+    }
+
+    // addMessage(data){
+
+    //     let foundUl = document.querySelector("#chat-ul")
+    //     let newLi 
+    // }
+
+   
     
     addContactList(){
         this.clearPage()
