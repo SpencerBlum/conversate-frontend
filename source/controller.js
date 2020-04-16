@@ -1,11 +1,17 @@
-//no css
+//make routes for users/:id
+//make controller method
+//add fetch call to adapter
+//create a back method that calls the fetsh and passes into load homepage
+//add a physical button to the convo page
+//move on and do other stuff
 
-//create delete functionality *
+
+
+
+//login other user to see updated convo
+//new convo
 //create back end route to accept an id and only return all contacts that is not him or already on his list
-//get all convopreviews to display use organization functions
-//when clicked on a convo show all the messages with name and message of who sent it li
-//add message to convo
-//add a new convo
+
 
 
 
@@ -17,9 +23,35 @@ class Controller{
     constructor(){
         this.adapter = new Adapter()
     }
+    renameMe(){
+        this.adapter.fetchOneUser(window.localStorage['user_id'])
+        .then(data =>  {
+            
+            this.userId = window.localStorage['user_id']
+            this.loadHomepage(data) 
+        })
+    }
+
+    logOutBtn(){
+
+        let logoutBtn = document.createElement("button")
+        logoutBtn.innerText = "<logout"
+        this.foundDiv().appendChild(logoutBtn)
+        logoutBtn.addEventListener("click", ()=>{
+        window.localStorage.clear()
+        this.clearPage()
+        this.initialize()
+    
+    } )
+    }
+
 
     initialize(){
-        
+        //console.log(window.localStorage["user"])
+        if (window.localStorage["user_id"] != undefined){
+            this.renameMe()
+    
+        }else{
         let signInForm = document.createElement("form")
         let emailLbl = document.createElement("label")
         let userEmail = document.createElement("input")
@@ -62,8 +94,8 @@ class Controller{
         signInForm.appendChild(passwordLbl)
         signInForm.appendChild(userPassword)
         signInForm.appendChild(userSubmit)
-
         mainDiv.appendChild(createAccountBtn)     
+        }
 
     }
 
@@ -80,10 +112,10 @@ class Controller{
             window.alert(user.message)
         } else {
             this.userId = user.id
+            window.localStorage['user_id'] = user.id
             this.loadHomepage(user)
         }
-    })
-
+    })  
     }
 
     clearPage(){
@@ -179,7 +211,7 @@ class Controller{
         let data = {
             email: e.target.email.value,
             password: e.target.password.value,
-            firstname: e.target.first_name.value,
+            first_name: e.target.first_name.value,
             last_name: e.target.last_name.value,
             username: e.target.username.value,
             phone_number: e.target.phone_number.value
@@ -193,7 +225,9 @@ class Controller{
     }
 
     loadHomepage(allUserData){
+       
         this.clearPage()
+        this.logOutBtn()
         console.log(allUserData)
 
         this.renderProfileInfo(allUserData)
@@ -233,7 +267,7 @@ class Controller{
 
     }
     
-    renderNavButtons(){   
+    renderNavButtons(){
         let buttonContainer = document.createElement("div")
         this.foundDiv().appendChild(buttonContainer)
 
@@ -244,7 +278,6 @@ class Controller{
         newContactBtn.addEventListener("click", (e)=> {
             this.addContactList()
         })
-
     }
 
     renderContacts(listOfContacts){
@@ -256,30 +289,85 @@ class Controller{
 
         let contactsTag = document.createElement("h3")
         contactsTag.innerText = "Contacts"
+
+        let createConvoBtn = document.createElement("button")
+            createConvoBtn.textContent = "New Conversation"
+            contactsTag.appendChild(createConvoBtn)
+
+            // let convoCallBack = () => { this.addConversation(this.userId)}
+
+            let convoCallBack = () => { this.getNotInConvoContacts(this.userId)}
+
+            createConvoBtn.addEventListener("click", convoCallBack)
+
+
         contactDiv.appendChild(contactsTag)
         console.log("happy")
         for (let user of listOfContacts) {
             let newLi = document.createElement("li")
             let deleteBtn = document.createElement("button")
             deleteBtn.textContent = "X"
-            newLi.appendChild(deleteBtn)
+            
+            
             newLi.innerText = `${user.first_name} ${user.last_name}`
             newLi.className = "contactListItem"
 
-            newLi.addEventListener("click", (e)=> {
-                console.log(e.target)
-            }) 
-
             contactList.appendChild(newLi)
             newLi.appendChild(deleteBtn)
-
             
+
             let myCallback = () => { this.deleteContact(this.userId, user) }
             deleteBtn.addEventListener("click", myCallback)
         }   
         contactDiv.appendChild(contactList)
 
     }
+
+    getNotInConvoContacts(userId){
+        console.log(userId)
+
+        this.adapter.fetchUsersNoConvo(userId)
+        .then(resp => {
+            console.log(resp)
+            this.renderNotInConvoContacts(resp)
+
+        })
+        
+
+    }
+
+    renderNotInConvoContacts(data){
+        this.clearPage()
+        this.renderBackBtn()
+        let newUl = document.createElement("ul")
+        this.foundDiv().appendChild(newUl)
+        data.forEach(user => {
+            
+            let newLi = document.createElement("li")
+            newLi.innerHTML = `${user.first_name} ${user.last_name}`
+            newUl.appendChild(newLi)
+
+            let startConvoBtn = document.createElement("button")
+            startConvoBtn.innerText = "message"
+            newLi.appendChild(startConvoBtn)
+
+            startConvoBtn.addEventListener("click", () => {
+            this.addConversation(user)
+            })
+        })
+    }
+
+    addConversation(user){
+        let data = {
+            from_user_id: this.userId,
+            to_user_id: user.id
+        }
+        this.adapter.fetchNewConversation(data)
+        .then(resp => {
+        this.renderChatPage(resp)
+        })   
+    }
+
 
     renderConvo(data){
         let convoDiv = document.createElement("div")
@@ -307,6 +395,7 @@ class Controller{
         .then(data => {
 
         console.log(data)  
+       
         this.renderChatPage(data)
 
         })
@@ -314,12 +403,31 @@ class Controller{
         //pass chat data into renderchat page
     }
 
+
+    renderBackBtn(){
+        let backBtn = document.createElement("button")
+        backBtn.innerText = "<back"
+        this.foundDiv().appendChild(backBtn)
+
+        backBtn.addEventListener("click", () => {
+            console.log(this.userId)
+            this.adapter.fetchOneUser(this.userId)
+            .then(resp => {
+                this.loadHomepage(resp)
+            })
+        })
+    }
+
     renderChatPage(data){
         this.clearPage()
+        
         let topDiv = document.createElement("div")
         let nameLabel = document.createElement("h5")
         nameLabel.innerText = "Chat with user name"
         topDiv.appendChild(nameLabel)
+
+        this.renderBackBtn()
+
         this.foundDiv().appendChild(topDiv)
 
         let chatDiv = document.createElement("div")
@@ -327,7 +435,10 @@ class Controller{
         let chatUl = document.createElement("ul")
         chatUl.id = "chat-ul"
         //do list stuff
+        console.log("test nsdfsfsdfsdfdf")
+        console.log(data)
         data.messages.forEach(chat => {
+            
             let messageLi = document.createElement("li")
             messageLi.innerText = `${chat.name.first_name} ${chat.name.last_name} - ${chat.message}`
             chatUl.appendChild(messageLi)
@@ -335,7 +446,6 @@ class Controller{
         chatDiv.appendChild(chatUl)
         this.foundDiv().appendChild(chatDiv)
         
-
         let formDiv = document.createElement("div")
         let form = document.createElement("form")
         let chatInput = document.createElement("input")
@@ -352,53 +462,36 @@ class Controller{
         form.append(chatInput, userSubmit)
 
         let myCallback = (mess) => {this.renderMessage(mess, data) }
-      
-        
         form.addEventListener("submit", (e) => {
             e.preventDefault()
-          
             myCallback(e.target.message.value)
         })
-        
-
     }
 
     renderMessage(mess, convoData ){
         console.log(mess)
         console.log(convoData)
-
-
         let data = {
             user_id: this.userId, 
             conversation_id: convoData.id,
             message: mess
         }
-
-         this.adapter.fetchNewMessage(data)
-         .then(resp => {
+        this.adapter.fetchNewMessage(data)
+        .then(resp => {
+            
             this.renderChatPage(resp)
-            
-            
-         })
-
-    }
-
-    // addMessage(data){
-
-    //     let foundUl = document.querySelector("#chat-ul")
-    //     let newLi 
-    // }
-
-   
-    
-    addContactList(){
-        this.clearPage()
-        this.adapter.fetchAllUsers()
-        .then(data => {
-            this.renderAllUsers(data)
+        
         })
     }
 
+    addContactList(){
+        this.clearPage()
+        this.adapter.fetchAllUsers(this.userId)
+        .then(data => {
+            console.log(data)
+            this.renderAllUsers(data)
+        })
+    }
 
     deleteContact(id, contact){
 
@@ -416,10 +509,10 @@ class Controller{
         })
     }
 
-    renderAllUsers(contacts){
 
-        //add back button here
-        // console.log(contacts)
+
+    renderAllUsers(contacts){
+        this.renderBackBtn()
         let contactListDiv = document.createElement("div")
         this.foundDiv().appendChild(contactListDiv)
 

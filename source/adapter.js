@@ -1,9 +1,22 @@
 class Adapter {
+
+
+
     
-    fetchAllUsers(){
-       return fetch("http://localhost:3000/users")
+    fetchAllUsers(id){
+       return fetch(`http://localhost:3000/allusers/${id}`)
         .then(resp => resp.json())
     }
+
+    fetchUsersNoConvo(id){
+        return fetch(`http://localhost:3000/users/noconvo/${id}`)
+         .then(resp => resp.json())
+     }
+
+    fetchOneUser(id){
+        return fetch(`http://localhost:3000/users/${id}`)
+         .then(resp => resp.json())
+     }
 
     fetchDeleteContact(id, contactId){
         return fetch(`http://localhost:3000/users/${id}/newcontact/${contactId}`, {
@@ -51,6 +64,17 @@ class Adapter {
          .then(resp => resp.json())
      }
 
+     fetchNewConversation(data){
+        return fetch("http://localhost:3000/conversations/new", {
+            method: 'POST', // or 'PUT'
+            headers: {
+        'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            })
+            .then((response) => response.json())   
+    }
+
     fetchNewMessage(data){
         return fetch("http://localhost:3000/conversations/newmessage", {
             method: 'POST', // or 'PUT'
@@ -61,4 +85,6 @@ class Adapter {
             })
             .then((response) => response.json())   
     }
+
+
 }
