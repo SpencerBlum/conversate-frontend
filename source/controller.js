@@ -36,6 +36,7 @@ class Controller{
 
         let logoutBtn = document.createElement("button")
         logoutBtn.innerText = "<logout"
+        logoutBtn.className = "btn btn-primary"
         this.foundDiv().appendChild(logoutBtn)
         logoutBtn.addEventListener("click", ()=>{
         window.localStorage.clear()
@@ -73,6 +74,8 @@ class Controller{
 
         userSubmit.type = "submit"
         userSubmit.value = "Submit"
+        userSubmit.className = "btn btn-primary"
+
 
         signInForm.addEventListener("submit", (e) => {
             e.preventDefault()
@@ -82,6 +85,7 @@ class Controller{
 
         createAccountBtn.innerText = "Create Account"
         createAccountBtn.id = "create-account"
+        createAccountBtn.className = "btn btn-primary"
         createAccountBtn.addEventListener("click",()=>this.renderCreateAccountPage())
 
 
@@ -176,6 +180,7 @@ class Controller{
 
         userSubmit.type = "submit"
         userSubmit.value = "Submit"
+        userSubmit.className = "btn btn-primary"
 
         let foundDiv = this.foundDiv()
         
@@ -200,7 +205,11 @@ class Controller{
             e.preventDefault()
             let promise = this.adapter.fetchCreateUser(this.processCreate(e))
             promise.then((user) => {
-                this.loadHomepage(user)
+                if (user.message === 'Loggin Failed'){
+                    window.alert(user.message)
+                } else {
+                    this.loadHomepage(user)
+                }
             })
         })
         //this click listner will call an adapter method to create a new acount
@@ -239,7 +248,9 @@ class Controller{
 
     renderProfileInfo(userData){
         let profileDiv = document.createElement("div")
+        this.foundDiv().className = "divstyle"
         this.foundDiv().appendChild(profileDiv)
+      
 
         let infoTag = document.createElement("h3")
         infoTag.innerText = "Profile"
@@ -273,6 +284,7 @@ class Controller{
 
         let newContactBtn = document.createElement("button")
         newContactBtn.innerText = "Add Contact"
+        newContactBtn.className = "btn btn-primary"
         buttonContainer.appendChild(newContactBtn)
 
         newContactBtn.addEventListener("click", (e)=> {
@@ -292,7 +304,8 @@ class Controller{
 
         let createConvoBtn = document.createElement("button")
             createConvoBtn.textContent = "New Conversation"
-            contactsTag.appendChild(createConvoBtn)
+            createConvoBtn.className = "btn btn-primary"
+            contactDiv.appendChild(createConvoBtn)
 
             // let convoCallBack = () => { this.addConversation(this.userId)}
 
@@ -306,7 +319,8 @@ class Controller{
         for (let user of listOfContacts) {
             let newLi = document.createElement("li")
             let deleteBtn = document.createElement("button")
-            deleteBtn.textContent = "X"
+            deleteBtn.textContent = "x"
+            deleteBtn.className = "btn btn-primary"
             
             
             newLi.innerText = `${user.first_name} ${user.last_name}`
@@ -346,10 +360,13 @@ class Controller{
             let newLi = document.createElement("li")
             newLi.innerHTML = `${user.first_name} ${user.last_name}`
             newUl.appendChild(newLi)
+            newLi.style.listStyle = "none"
 
             let startConvoBtn = document.createElement("button")
             startConvoBtn.innerText = "message"
+            startConvoBtn.className = "btn btn-primary"
             newLi.appendChild(startConvoBtn)
+            
 
             startConvoBtn.addEventListener("click", () => {
             this.addConversation(user)
@@ -378,11 +395,13 @@ class Controller{
         convoDiv.appendChild(conversationsLbl)
 
         let newUl = document.createElement("ul")
+        newUl.className = "list-group"
         convoDiv.appendChild(newUl)
-        newUl.style.listStyle = "none"
+        // newUl.style.listStyle = "none"
         data.conversations.forEach(convo => {
             console.log(convo)
             let newLi = document.createElement("li")
+            newLi.className = "list-group-item"
             newLi.innerText = `${convo.first_name} ${convo.last_name}`
             newUl.appendChild(newLi)
             let myCallback = () => { this.loadSpecifcChat(convo.conversation_id) }
@@ -407,6 +426,7 @@ class Controller{
     renderBackBtn(){
         let backBtn = document.createElement("button")
         backBtn.innerText = "<back"
+        backBtn.className = "btn btn-primary"
         this.foundDiv().appendChild(backBtn)
 
         backBtn.addEventListener("click", () => {
@@ -423,7 +443,7 @@ class Controller{
         
         let topDiv = document.createElement("div")
         let nameLabel = document.createElement("h5")
-        nameLabel.innerText = "Chat with user name"
+        nameLabel.innerText = `Chat with ${data.user_id.first_name} ${data.user_id.last_name}`
         topDiv.appendChild(nameLabel)
 
         this.renderBackBtn()
@@ -440,6 +460,7 @@ class Controller{
         data.messages.forEach(chat => {
             
             let messageLi = document.createElement("li")
+            messageLi.className = "message"
             messageLi.innerText = `${chat.name.first_name} ${chat.name.last_name} - ${chat.message}`
             chatUl.appendChild(messageLi)
         })
@@ -455,6 +476,7 @@ class Controller{
         chatInput.placeholder = "Type here..."
 
         userSubmit.type = "submit"
+        userSubmit.className = "btn btn-primary"
         userSubmit.value = "send"
 
         this.foundDiv().appendChild(formDiv)
@@ -517,10 +539,12 @@ class Controller{
         this.foundDiv().appendChild(contactListDiv)
 
         let userUl = document.createElement("ul")
-        userUl.style.listStyle = "none"
+        userUl.className = "list-group"
+        // userUl.style.listStyle = "none"
 
         contacts.forEach(( currContact) =>{
             let newLi = document.createElement("li")
+            newLi.className = "list-group-item"
             //newLi.id = currContact.id
             newLi.innerText = `${currContact.first_name} ${currContact.last_name}`
             userUl.appendChild(newLi)
